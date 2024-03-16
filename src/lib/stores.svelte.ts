@@ -1,4 +1,4 @@
-import { alphabet, generateRandomString } from "oslo/crypto";
+import { generateId, type List } from "./utils";
 
 // Browser + Local Storage
 const browser_exists = (typeof window !== "undefined") && (typeof (document) !== "undefined");
@@ -10,8 +10,7 @@ export function persisted<T>(key: string, default_value: T) {
 
   const initial_local = storage?.getItem(key);
   if (initial_local) {
-      value = JSON.parse(initial_local).value as T;
-      if (!value) { update(); }
+    value = JSON.parse(initial_local).value as T;
   }
   else {
     value = default_value;
@@ -31,18 +30,6 @@ export function persisted<T>(key: string, default_value: T) {
   }
 }
 
-export type Task = {
-  id: string;
-  description: string;
-  is_completed: boolean;
-}
-
-export type List = {
-  id: string;
-  title: string;
-  tasks: Task[];
-}
-
 export const local_lists = persisted<List[]>("local_lists", [
   {
     id: generateId(),
@@ -55,7 +42,3 @@ export const local_lists = persisted<List[]>("local_lists", [
 ]);
 
 export const pinned_list = persisted<string>("pinned_list", local_lists.value![0].id);
-
-export function generateId() {
-  return generateRandomString(10, alphabet("a-z", "0-9"));
-}
