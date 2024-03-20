@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import { local_lists, pinned_list, generateId, type List } from "$lib/stores.svelte";
-  import { goto, pushState } from "$app/navigation";
-  import toast, { Toaster } from "svelte-french-toast";
+  import { goto } from "$app/navigation";
+  import toast from "svelte-french-toast";
+  import { generateId } from "$lib/utils";
+  import type { Task, List } from "$lib/utils";
+  import { local_lists, pinned_list } from "$lib/stores.svelte";
 
   let is_menu_open = $state(false);
   let list : List | undefined = $state(); 
@@ -35,7 +37,7 @@
 
   function deleteTask(id: string) {
     if (list) {
-      list.tasks = list.tasks.filter((t) => t.id !== id);
+      list.tasks = list.tasks.filter((t : Task) => t.id !== id);
     }
   }
 
@@ -71,6 +73,10 @@
     goto(`/${list!.id}`);
   }
 </script>
+
+<svelte:head>
+  <title>{list ? list.title : "Loading..."} - easytodo.link</title>
+</svelte:head>
 
 <main class="flex flex-col w-full px-2 pt-8 pb-12 lg:p-4 lg:pb-24 gap-8 text-xl lg:text-3xl">
   {#if list}
@@ -121,12 +127,12 @@
         </menu>
       {/if}
     </section>
-        <input 
-          type="text" 
-          bind:value={list.title} 
-          placeholder="Untitled"
-          class="text-5xl font-bold bg-transparent"
-        />
+    <input 
+      type="text" 
+      bind:value={list.title} 
+      placeholder="Untitled"
+      class="text-5xl font-bold bg-transparent hover:underline"
+    />
     <ul class="flex flex-col gap-4">
       {#each list.tasks as task (task.id)}
         <li class="group flex justify-between items-center gap-4">
@@ -146,9 +152,9 @@
           <div class="flex lg:hidden group-hover:flex gap-4 w-fit">
             <button 
               onclick={() => deleteTask(task.id)}
-              class="px-4 py-2 bg-red-500 rounded-xl text-white"
+              class="bg-red-500 rounded-xl text-white"
             >
-              -
+              <img src="/trash-line.svg" alt={`Delete task: ${task.description}`} class="w-12 h-12" />
             </button>
           </div>
         </li>
